@@ -17,44 +17,78 @@ namespace SuperHeroApi.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
-            return Ok(repo.GetHeroList());
+            try
+            {
+                return Ok(repo.GetHeroList());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
         }
 
         [HttpGet("{Id}")]
-        public IActionResult Get(int Id)
+        public async Task<IActionResult> Get(int Id)
         {
-            var hero = repo.GetHeroDetailsById(Id);
-            if (hero == null)
-                return BadRequest("Hero Not Found");
-            return Ok(hero);
-
+            try
+            {
+                var result = repo.GetHeroDetailsById(Id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
         }
 
         [HttpPost]
-        public IActionResult AddHero(SuperHero hero)
-        {   
-            repo.InsertHero(hero);
-            return Ok(repo.GetHeroList());
+        public async Task<IActionResult> AddHero(SuperHero hero)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    return Ok(repo.InsertHero(hero));
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }    
         }
 
         [HttpPut]
-        public IActionResult UpdateHero(SuperHero request)
+        public async Task<IActionResult> UpdateHero(SuperHero request)
         {
-            var hero = repo.ChangeHero(request);
-            if (hero == null)
-                return BadRequest("Hero Not Found");
-            return Ok(repo.GetHeroList());
+            try
+            {
+                var result = repo.ChangeHero(request);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
         }
 
         [HttpDelete("{Id}")]
-        public IActionResult Delete(int Id)
+        public async Task<IActionResult> Delete(int Id)
         {
-            var hero = repo.DeleteHero(Id);
-            if (hero == null)
-                return BadRequest("Hero Not Found");
-            return Ok(repo.GetHeroList());
+            try
+            {
+                var result = repo.DeleteHero(Id);
+                return Ok(result);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex);
+            } 
 
         }
     }

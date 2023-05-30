@@ -10,13 +10,13 @@ namespace SuperHeroApi.Repository
 
         public List<SuperHero> GetHeroList();
 
-        public SuperHero GetHeroDetailsById(int empId);
+        public bool GetHeroDetailsById(int empId);
 
-        public int InsertHero(SuperHero Hero);
+        public SuperHero InsertHero(SuperHero Hero);
 
         public SuperHero ChangeHero(SuperHero request);
 
-        public SuperHero DeleteHero(int superheroId);
+        public bool DeleteHero(int superheroId);
 
 
     }

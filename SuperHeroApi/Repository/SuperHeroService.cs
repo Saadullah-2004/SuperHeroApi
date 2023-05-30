@@ -11,21 +11,28 @@ namespace SuperHeroApi.Repository
             _context = context;
         }
  
-        public SuperHero DeleteHero(int superheroId)
+        public bool DeleteHero(int superheroId)
         {
-            var hero = GetHeroDetailsById(superheroId);
+            bool match = false;
+            var hero = _context.SuperHeroes.Find(superheroId);
             if (hero != null)
             {
                 _context.SuperHeroes.Remove(hero);
-                _context.SaveChanges();
+                _context.SaveChangesAsync();
+                match = true;
             }
-            return hero;
+            return match;
         }
 
-        public SuperHero GetHeroDetailsById(int empId)
+        public bool GetHeroDetailsById(int empId)
         {
+            bool match = false;
             var hero = _context.SuperHeroes.Find(empId);
-            return hero;
+            if (hero != null)
+            {
+                match = true;
+            }
+            return match;
         }
 
         public List<SuperHero> GetHeroList()
@@ -33,25 +40,24 @@ namespace SuperHeroApi.Repository
             return _context.SuperHeroes.ToList();
         }
 
-        public int InsertHero(SuperHero Hero)
+        public SuperHero InsertHero(SuperHero Hero)
         {
-            _context.SuperHeroes.Add(Hero);
+            _context.SuperHeroes.AddAsync(Hero);
 
-            return _context.SaveChanges();
+            _context.SaveChangesAsync();
+            return Hero;
         }
 
         public SuperHero ChangeHero(SuperHero request)
         {
-            var hero = _context.SuperHeroes.Find(request.Id);
-            if (hero != null)
-            {
-                hero.FirstName = request.FirstName;
-                hero.LastName = request.LastName;
-                hero.Place = request.Place;
-                hero.Name = request.Name;
-            }
+            var hero = _context.SuperHeroes.Where(x => x.Id == request.Id).FirstOrDefault();
+            hero.FirstName = request.FirstName;
+            hero.LastName = request.LastName;
+            hero.Place = request.Place;
+            hero.Name = request.Name;
             _context.SaveChanges();
             return hero;
         }
+
     }
 }
