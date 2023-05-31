@@ -1,4 +1,6 @@
-﻿using SuperHeroApi.Models;
+﻿using Microsoft.AspNetCore.Localization;
+using Microsoft.OpenApi.Any;
+using SuperHeroApi.Models;
 
 namespace SuperHeroApi.Repository
 {
@@ -24,15 +26,18 @@ namespace SuperHeroApi.Repository
             return match;
         }
 
-        public bool GetHeroDetailsById(int empId)
+        public SuperHero GetHeroDetailsById(int empId)
         {
-            bool match = false;
-            var hero = _context.SuperHeroes.Find(empId);
-            if (hero != null)
+            SuperHero hero;
+            try
             {
-                match = true;
+                hero = _context.SuperHeroes.Find(empId);
+
+            } catch (Exception)
+            {
+                throw;
             }
-            return match;
+            return hero;
         }
 
         public List<SuperHero> GetHeroList()

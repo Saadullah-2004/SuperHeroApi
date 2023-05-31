@@ -40,6 +40,19 @@ namespace ApiTests
         }
 
         [TestMethod]
+
+        public async Task Get_HeroID_ReturnOK()
+        {
+            _service.Setup(repo => repo.GetHeroDetailsById(It.IsAny<int>())).Returns(It.IsAny<SuperHero>);
+            _controller = new SuperHeroController(_service.Object);
+
+            var result = await _controller.Get(It.IsAny<int>());
+            var obj = result as ObjectResult;
+            Assert.AreEqual(200, obj.StatusCode);
+
+        }
+
+        [TestMethod]
         public async Task Get_Hero_ThrowException()
         {
             _service.Setup(repo => repo.GetHeroList()).Throws(new Exception());
@@ -80,7 +93,7 @@ namespace ApiTests
             _controller = new SuperHeroController(_service.Object);
 
             var result = await _controller.Delete(It.IsAny<int>());
-            var obj = result as ObjectResult;
+                var obj = result as ObjectResult;
             Assert.AreEqual(200, obj.StatusCode);
         }
 
