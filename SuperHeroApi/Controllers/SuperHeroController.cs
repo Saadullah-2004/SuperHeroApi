@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using RoundtheCode.BasicAuthentication.Shared.Authentication.Basic.Attributes;
 using SuperHeroApi.Models;
 using SuperHeroApi.Repository;
 
@@ -16,8 +17,8 @@ namespace SuperHeroApi.Controllers
             repo = _Repo;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Get()
+        [HttpGet, BasicAuthorization]
+        public IActionResult Get()
         {
             try
             {
@@ -30,7 +31,7 @@ namespace SuperHeroApi.Controllers
         }
 
         [HttpGet("{Id}")]
-        public async Task<IActionResult> Get(int Id)
+        public IActionResult Get(int Id)
         {
             try
             {
@@ -44,7 +45,7 @@ namespace SuperHeroApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddHero(SuperHero hero)
+        public IActionResult AddHero(SuperHero hero)
         {
             try
             {
@@ -64,7 +65,7 @@ namespace SuperHeroApi.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateHero(SuperHero request)
+        public IActionResult UpdateHero(SuperHero request)
         {
             try
             {
@@ -78,7 +79,7 @@ namespace SuperHeroApi.Controllers
         }
 
         [HttpDelete("{Id}")]
-        public async Task<IActionResult> Delete(int Id)
+        public IActionResult Delete(int Id)
         {
             try
             {
