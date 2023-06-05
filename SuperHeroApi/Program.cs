@@ -1,14 +1,23 @@
 global using Microsoft.EntityFrameworkCore;
 global using SuperHeroApi.Data;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using RoundtheCode.BasicAuthentication.Shared.Authentication.Basic;
 using SuperHeroApi.Repository;
+using Microsoft.Extensions.Configuration;
+using System.Text;
+using SuperHeroApi.ApiKeyAttributes;
+using SuperHeroApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
+var config = builder.Configuration;
+
 
 // Add services to the container.
-
+builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddDbContext<DataContext>(options =>
 {
@@ -49,6 +58,25 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>(
     BasicAuthenticationDefaults.AuthenticationSchemes, null);
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+});
+
+
+
+builder.Services.AddSingleton<ApiKeyAuthorizationFilter>();
+
+builder.Services.AddSingleton<IApiKeyValidator, ApiKeyValidator>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -58,7 +86,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

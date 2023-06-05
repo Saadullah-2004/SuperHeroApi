@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using RoundtheCode.BasicAuthentication.Shared.Authentication.Basic.Attributes;
 using SuperHeroApi.Models;
 using SuperHeroApi.Repository;
+using Microsoft.AspNetCore.Authorization;
+using SuperHeroApi.ApiKeyAttributes;
 
 namespace SuperHeroApi.Controllers
 {
@@ -17,6 +19,7 @@ namespace SuperHeroApi.Controllers
             repo = _Repo;
         }
 
+
         [HttpGet, BasicAuthorization]
         public IActionResult Get()
         {
@@ -30,6 +33,7 @@ namespace SuperHeroApi.Controllers
             }
         }
 
+        [ApiKey]
         [HttpGet("{Id}")]
         public IActionResult Get(int Id)
         {
@@ -43,7 +47,7 @@ namespace SuperHeroApi.Controllers
                 return BadRequest(ex);
             }
         }
-
+        [Authorize]
         [HttpPost]
         public IActionResult AddHero(SuperHero hero)
         {

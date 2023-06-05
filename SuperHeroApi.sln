@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiTests", "ApiTests\ApiTes
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{18208ABA-8E9B-41AC-8DC6-2D52177BFA2C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoundtheCode.BasicAuthentication.Shared", "RoundtheCode.BasicAuthentication.Shared\RoundtheCode.BasicAuthentication.Shared.csproj", "{A611EAC5-0A80-4F27-9848-E8C334187FD8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoundtheCode.BasicAuthentication.Shared", "RoundtheCode.BasicAuthentication.Shared\RoundtheCode.BasicAuthentication.Shared.csproj", "{A611EAC5-0A80-4F27-9848-E8C334187FD8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
