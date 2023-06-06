@@ -33,7 +33,6 @@ namespace SuperHeroApi.Controllers
             }
         }
 
-        [ApiKey]
         [HttpGet("{Id}")]
         public IActionResult Get(int Id)
         {

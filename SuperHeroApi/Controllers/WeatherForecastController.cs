@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SuperHeroApi.Models;
 
@@ -18,7 +19,7 @@ namespace SuperHeroApi.Controllers
         {
             _logger = logger;
         }
-
+        [Authorize]
         [HttpGet(Name = "GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
         {
