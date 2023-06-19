@@ -3,9 +3,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using SuperHeroApi.ApiKeyAttributes;
 using SuperHeroApi.Auth;
 using SuperHeroApi.Models;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -29,7 +32,6 @@ namespace SuperHeroApi.Controllers
             _roleManager = roleManager;
             _configuration = configuration;
         }
-
         [HttpPost]
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
@@ -40,10 +42,10 @@ namespace SuperHeroApi.Controllers
                 var userRoles = await _userManager.GetRolesAsync(user);
 
                 var authClaims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                };
+        {
+            new Claim(ClaimTypes.Name, user.UserName),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        };
 
                 foreach (var userRole in userRoles)
                 {
@@ -53,20 +55,24 @@ namespace SuperHeroApi.Controllers
                 var token = CreateToken(authClaims);
                 var refreshToken = GenerateRefreshToken();
 
-                _ = int.TryParse(_configuration["JWT:RefreshTokenValidityInDays"], out int refreshTokenValidityInDays);
+                _ = int.TryParse(_configuration["JWT:RefreshTokenValidity"], out int refreshTokenValidity);
 
                 user.RefreshToken = refreshToken;
-                user.RefreshTokenExpiryTime = DateTime.Now.AddDays(refreshTokenValidityInDays);
+                user.RefreshTokenExpiryTime = DateTime.Now.AddMinutes(refreshTokenValidity);
 
                 await _userManager.UpdateAsync(user);
+
+                var accessTokenExpiration = DateTime.Now.AddMinutes(_configuration.GetValue<int>("JWT:TokenValidityInMinutes"));
 
                 return Ok(new
                 {
                     Token = new JwtSecurityTokenHandler().WriteToken(token),
                     RefreshToken = refreshToken,
-                    Expiration = token.ValidTo
+                    Expiration = accessTokenExpiration, // Include the access token expiration time
+                    RefreshTokenExpiration = user.RefreshTokenExpiryTime
                 });
             }
+
             return Unauthorized();
         }
 
@@ -76,17 +82,17 @@ namespace SuperHeroApi.Controllers
         {
             var userExists = await _userManager.FindByNameAsync(model.Username);
             if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
+                return Ok(new Response { Status = "Error", Message = "User already exists!" });
 
-            ApplicationUser user = new()
+            ApplicationUser user = new ApplicationUser
             {
-                Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Username
             };
+
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+                return Ok(new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
 
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
@@ -101,7 +107,6 @@ namespace SuperHeroApi.Controllers
 
             ApplicationUser user = new()
             {
-                Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Username
             };
@@ -119,6 +124,39 @@ namespace SuperHeroApi.Controllers
                 await _userManager.AddToRoleAsync(user, UserRoles.Admin);
             }
             if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
+            {
+                await _userManager.AddToRoleAsync(user, UserRoles.User);
+            }
+            return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+        }
+
+        [HttpPost]
+        [Route("register-manager")]
+        public async Task<IActionResult> RegisterManager([FromBody] RegisterModel model)
+        {
+            var userExists = await _userManager.FindByNameAsync(model.Username);
+            if (userExists != null)
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
+
+            ApplicationUser user = new()
+            {
+                SecurityStamp = Guid.NewGuid().ToString(),
+                UserName = model.Username
+            };
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (!result.Succeeded)
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+
+            if (!await _roleManager.RoleExistsAsync(UserRoles.Manager))
+                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Manager));
+            if (!await _roleManager.RoleExistsAsync(UserRoles.User))
+                await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+
+            if (await _roleManager.RoleExistsAsync(UserRoles.Manager))
+            {
+                await _userManager.AddToRoleAsync(user, UserRoles.Manager);
+            }
+            if (await _roleManager.RoleExistsAsync(UserRoles.Manager))
             {
                 await _userManager.AddToRoleAsync(user, UserRoles.User);
             }
@@ -159,13 +197,19 @@ namespace SuperHeroApi.Controllers
             var newAccessToken = CreateToken(principal.Claims.ToList());
             var newRefreshToken = GenerateRefreshToken();
 
+            _ = int.TryParse(_configuration["JWT:RefreshTokenValidity"], out int refreshTokenValidity);
+
             user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiryTime = DateTime.Now.AddMinutes(refreshTokenValidity);
             await _userManager.UpdateAsync(user);
+
+            var accessTokenExpiration = DateTime.Now.AddMinutes(_configuration.GetValue<int>("JWT:TokenValidityInMinutes"));
 
             return new ObjectResult(new
             {
                 accessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
-                refreshToken = newRefreshToken
+                refreshToken = newRefreshToken,
+                accessTokenExpiration = accessTokenExpiration // Include the access token expiration time
             });
         }
 

@@ -5,7 +5,7 @@ namespace SuperHeroApi.Middleware
 {
     public class ApiKeyAuthorizationFilter : IAuthorizationFilter
 {
-    private const string ApiKeyHeaderName = "X-API-Key";
+    private const string ApiKeyHeaderName = "x-api-key";
 
     private readonly IApiKeyValidator _apiKeyValidator;
 

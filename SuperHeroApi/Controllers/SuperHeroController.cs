@@ -19,8 +19,8 @@ namespace SuperHeroApi.Controllers
             repo = _Repo;
         }
 
-
-        [HttpGet, BasicAuthorization]
+        [Authorize]
+        [HttpGet]
         public IActionResult Get()
         {
             try
@@ -46,6 +46,7 @@ namespace SuperHeroApi.Controllers
                 return BadRequest(ex);
             }
         }
+        [ApiKey]
         [Authorize]
         [HttpPost]
         public IActionResult AddHero(SuperHero hero)

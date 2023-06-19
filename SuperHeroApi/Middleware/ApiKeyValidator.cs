@@ -10,7 +10,7 @@
         }
         public bool IsValid(string apiKey)
         {
-            string expectedApiKey = _configuration["ApiKey"];
+            string expectedApiKey = _configuration["x-api-key"];
 
             return apiKey == expectedApiKey;
         }
