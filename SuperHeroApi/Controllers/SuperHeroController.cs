@@ -19,7 +19,6 @@ namespace SuperHeroApi.Controllers
             repo = _Repo;
         }
 
-        [Authorize]
         [HttpGet]
         public IActionResult Get()
         {
@@ -46,10 +45,8 @@ namespace SuperHeroApi.Controllers
                 return BadRequest(ex);
             }
         }
-        [ApiKey]
-        [Authorize]
         [HttpPost]
-        public IActionResult AddHero(SuperHero hero)
+        public IActionResult AddHero([FromBody] SuperHero hero)
         {
             try
             {
@@ -65,7 +62,7 @@ namespace SuperHeroApi.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex);
-            }    
+            }
         }
 
         [HttpPut]
@@ -73,7 +70,7 @@ namespace SuperHeroApi.Controllers
         {
             try
             {
-                var result = repo.ChangeHero(request);
+                var result = repo.UpdateHero(request);
                 return Ok(result);
             }
             catch (Exception ex)

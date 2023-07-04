@@ -14,7 +14,7 @@ namespace SuperHeroApi.Repository
 
         public SuperHero InsertHero(SuperHero Hero);
 
-        public SuperHero ChangeHero(SuperHero request);
+        public SuperHero UpdateHero(SuperHero request);
 
         public bool DeleteHero(int superheroId);
 

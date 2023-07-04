@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Localization;
-using Microsoft.OpenApi.Any;
-using SuperHeroApi.Models;
+﻿using SuperHeroApi.Models;
+using SuperHeroApi.Data;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SuperHeroApi.Repository
 {
@@ -12,7 +14,7 @@ namespace SuperHeroApi.Repository
         {
             _context = context;
         }
- 
+
         public bool DeleteHero(int superheroId)
         {
             bool match = false;
@@ -20,49 +22,49 @@ namespace SuperHeroApi.Repository
             if (hero != null)
             {
                 _context.SuperHeroes.Remove(hero);
-                _context.SaveChangesAsync();
+                _context.SaveChanges();
                 match = true;
             }
             return match;
         }
 
-        public SuperHero GetHeroDetailsById(int empId)
+        public SuperHero GetHeroDetailsById(int heroId)
         {
-            SuperHero hero;
-            try
-            {
-                hero = _context.SuperHeroes.Find(empId);
-
-            } catch (Exception)
-            {
-                throw;
-            }
-            return hero;
+            return _context.SuperHeroes.Find(heroId);
         }
 
         public List<SuperHero> GetHeroList()
         {
-            return _context.SuperHeroes.ToList();
+
+            return _context.SuperHeroes
+                .Include(sh => sh.Country) // Eager loading of Country
+                .Include(sh => sh.Genre) // Eager loading of Genre
+                .ToList();
         }
 
-        public SuperHero InsertHero(SuperHero Hero)
+        public SuperHero InsertHero(SuperHero hero)
         {
-            _context.SuperHeroes.AddAsync(Hero);
-
-            _context.SaveChangesAsync();
-            return Hero;
-        }
-
-        public SuperHero ChangeHero(SuperHero request)
-        {
-            var hero = _context.SuperHeroes.Where(x => x.Id == request.Id).FirstOrDefault();
-            hero.FirstName = request.FirstName;
-            hero.LastName = request.LastName;
-            hero.Place = request.Place;
-            hero.Name = request.Name;
+            _context.SuperHeroes.Add(hero);
             _context.SaveChanges();
             return hero;
         }
 
+        public SuperHero UpdateHero(SuperHero hero)
+        {
+            var existingHero = _context.SuperHeroes.Find(hero.Id);
+            if (existingHero != null)
+            {
+                existingHero.FirstName = hero.FirstName;
+                existingHero.LastName = hero.LastName;
+                existingHero.Place = hero.Place;
+                existingHero.Name = hero.Name;
+                existingHero.CountryId = hero.CountryId;
+                existingHero.GenreId = hero.GenreId;
+                existingHero.Country = hero.Country;
+                _context.SaveChanges();
+                return existingHero;
+            }
+            return null;
+        }
     }
 }

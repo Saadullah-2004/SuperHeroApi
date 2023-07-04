@@ -79,7 +79,7 @@ namespace ApiTests
         public void Put_Hero_ReturnOk()
         {
             var hero = _fixture.Create<SuperHero>();
-            _service.Setup(repo => repo.ChangeHero(It.IsAny<SuperHero>())).Returns(hero);
+            _service.Setup(repo => repo.UpdateHero(It.IsAny<SuperHero>())).Returns(hero);
             _controller = new SuperHeroController(_service.Object);
 
             var result = _controller.UpdateHero(hero);

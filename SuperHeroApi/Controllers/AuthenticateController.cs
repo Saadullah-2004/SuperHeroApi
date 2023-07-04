@@ -66,10 +66,10 @@ namespace SuperHeroApi.Controllers
 
                 return Ok(new
                 {
-                    Token = new JwtSecurityTokenHandler().WriteToken(token),
-                    RefreshToken = refreshToken,
-                    Expiration = accessTokenExpiration, // Include the access token expiration time
-                    RefreshTokenExpiration = user.RefreshTokenExpiryTime
+                    token = new JwtSecurityTokenHandler().WriteToken(token),
+                    refresh = refreshToken,
+                    expiration = accessTokenExpiration, // Include the access token expiration time
+                    refreshTokenExpiration = user.RefreshTokenExpiryTime
                 });
             }
 
@@ -209,7 +209,7 @@ namespace SuperHeroApi.Controllers
             {
                 accessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
                 refreshToken = newRefreshToken,
-                accessTokenExpiration = accessTokenExpiration // Include the access token expiration time
+                accessTokenExp = accessTokenExpiration // Include the access token expiration time
             });
         }
 
